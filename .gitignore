@@ -1,0 +1,5 @@
+__pycache__/
+.pytest*/
+.vscode/
+sprites/
+lvl1.txt
