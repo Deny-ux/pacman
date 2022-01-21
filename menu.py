@@ -55,9 +55,8 @@ class MainMenu(Menu):
                 self.cursor_target = "Credits"
                 self.cursor_rect.x, self.cursor_rect.y = MAIN_CREDITS_X_POS + CURSOR_OFFSET_X, MAIN_CREDITS_Y_POS
         elif self.game.ENTER_KEY:
-            print(self.cursor_target)
             if self.cursor_target == "Start game":
-                print("PRESSED ENTER IS START GAME")
+                ("PRESSED ENTER IS START GAME")
                 self.game.current_menu = self.game.choose_game_menu
             elif self.cursor_target == "High score":
                 self.game.current_menu = self.game.high_score_menu
@@ -288,11 +287,9 @@ class ChooseGameMenu(Menu):
             self.game.current_menu = self.game.main_menu
         elif self.game.ENTER_KEY:
             if self.cursor_target == "Load saved game":
-                print("load")
                 self.game.load_saved_game()
                 self.game.playing = True
             elif self.cursor_target == "Start new game":
-                print("new")
                 self.game.start_new_game()
                 self.game.playing = True
 
@@ -319,17 +316,15 @@ class FinishedGameMenu(Menu):
                 new_score_item = (self.game.player_name, self.game.player.score)
                 new_high_score_list = \
                     helper_functions.get_updated_high_score_list(new_score_item, SCORE_FILE_NAME)
-                if new_high_score_list != \
-                    helper_functions.load_high_score_data_from_file:
-                    helper_functions.write_high_score_data_to_file(new_high_score_list, SCORE_FILE_NAME)
-
+                helper_functions.write_high_score_data_to_file(new_high_score_list, SCORE_FILE_NAME)
+                self.game.playing = False
                 self.game.player.reset()
 
                 self.game.current_menu = self.game.main_menu
             elif self.cursor_target == "Play again":
-                self.game.start_new_game()
-                self.game.player.direction = vec(0, 0)
-                self.game.player.stored_direction = vec(0, 0)
+                saved_lives = self.game.player.lives
+                saved_score = self.game.player.score
+                self.game.start_new_game(saved_score, saved_lives)
                 self.game.playing = True
 
     def display_menu(self):
@@ -356,7 +351,137 @@ class FinishedGameMenu(Menu):
             self.draw_cursor()
             pygame.display.update()
             self.game.reset_keys()
-
+import player
+###########################
 class PauseMenu(Menu):
     def __init__(self, game) -> None:
         super().__init__(game)
+        self.cursor_target = "Continue"
+        self.cursor_rect.x, self.cursor_rect.y = \
+        PAUSE_CONTINUE_POS[0] + CURSOR_OFFSET_X, PAUSE_CONTINUE_POS[1]
+
+    def check_events(self):
+        if self.game.DOWN_KEY:
+            if self.cursor_target == "Continue":
+                self.cursor_target = "Save game"
+                self.cursor_rect.x, self.cursor_rect.y = PAUSE_SAVE_GAME_POS[0] + CURSOR_OFFSET_X, PAUSE_SAVE_GAME_POS[1]
+            elif self.cursor_target == "Save game":
+                self.cursor_target = "Go to main menu"
+                self.cursor_rect.x, self.cursor_rect.y = PAUSE_GO_MAIN_POS[0] + CURSOR_OFFSET_X, PAUSE_GO_MAIN_POS[1]
+            elif self.cursor_target == "Go to main menu":
+                self.cursor_target = "Continue"
+                self.cursor_rect.x, self.cursor_rect.y = PAUSE_CONTINUE_POS[0] + CURSOR_OFFSET_X, PAUSE_CONTINUE_POS[1]
+        elif self.game.UP_KEY:
+            if self.cursor_target == "Continue":
+                self.cursor_target = "Go to main menu"
+                self.cursor_rect.x, self.cursor_rect.y = PAUSE_GO_MAIN_POS[0] + CURSOR_OFFSET_X, PAUSE_GO_MAIN_POS[1]
+            elif self.cursor_target == "Save game":
+                self.cursor_target = "Continue"
+                self.cursor_rect.x, self.cursor_rect.y = PAUSE_CONTINUE_POS[0] + CURSOR_OFFSET_X, PAUSE_CONTINUE_POS[1]
+            elif self.cursor_target == "Go to main menu":
+                self.cursor_target = "Save game"
+                self.cursor_rect.x, self.cursor_rect.y = PAUSE_SAVE_GAME_POS[0] + CURSOR_OFFSET_X, PAUSE_SAVE_GAME_POS[1]
+        elif self.game.ENTER_KEY:
+            if self.cursor_target == "Continue":
+                print("continue")
+                self.game.playing = True
+            elif self.cursor_target == "Save game":
+                print("save gabe")
+                self.game.save_current_game_to_file(SAVED_GAME_FILE_NAME)
+            elif self.cursor_target == "Go to main menu":
+                if self.game.player is not None:
+                    new_score_item = (self.game.player_name, self.game.player.score)
+                    new_high_score_list = \
+                        helper_functions.get_updated_high_score_list(new_score_item, SCORE_FILE_NAME)
+                    helper_functions.write_high_score_data_to_file(new_high_score_list, SCORE_FILE_NAME)
+                self.game.current_menu = self.game.main_menu
+                print("exit")
+
+    def display_menu(self):
+
+        while self.game.current_menu == self.game.pause_menu and \
+            not self.game.playing:
+            self.game.window.fill(BLACK)
+            self.game.check_events()
+            self.check_events()
+            self.game.draw_text(
+                self.game.window, "PAUSE", CASUAL_TEXT_SIZE+10,
+                [HALF_DISP_WIDTH, 100], ORANGE,
+                True
+            )
+
+            self.game.draw_text(
+                self.game.window, "Continue", CASUAL_TEXT_SIZE,
+                PAUSE_CONTINUE_POS, YELLOW,
+                False
+            )
+            self.game.draw_text(
+                self.game.window, "Save game", CASUAL_TEXT_SIZE,
+                PAUSE_SAVE_GAME_POS, YELLOW,
+                False
+            )
+            self.game.draw_text(
+                self.game.window, "Go to main menu", CASUAL_TEXT_SIZE,
+                PAUSE_GO_MAIN_POS, YELLOW,
+                False
+            )
+            self.draw_cursor()
+            pygame.display.update()
+            self.game.reset_keys()
+
+
+
+class GameOverMenu(Menu):
+    def __init__(self, game) -> None:
+        super().__init__(game)
+        self.cursor_target = "Start new game"
+        self.cursor_rect.x, self.cursor_rect.y = \
+        GAME_OVER_AGAIN_POS[0] + CURSOR_OFFSET_X, GAME_OVER_AGAIN_POS[1]
+
+    def check_events(self):
+        if self.game.DOWN_KEY or self.game.UP_KEY:
+            if self.cursor_target == "Start new game":
+                self.cursor_target = "Go to main menu"
+                self.cursor_rect.x, self.cursor_rect.y = \
+                    GAME_OVER_GO_MAIN_POS[0] + CURSOR_OFFSET_X, GAME_OVER_GO_MAIN_POS[1]
+            elif self.cursor_target == "Go to main menu":
+                self.cursor_target = "Start new game"
+                self.cursor_rect.x, self.cursor_rect.y = \
+                    GAME_OVER_AGAIN_POS[0] + CURSOR_OFFSET_X, GAME_OVER_AGAIN_POS[1]
+        elif self.game.ENTER_KEY:
+            if self.game.player is not None:
+                new_score_item = (self.game.player_name, self.game.player.score)
+                new_high_score_list = \
+                    helper_functions.get_updated_high_score_list(new_score_item, SCORE_FILE_NAME)
+                helper_functions.write_high_score_data_to_file(new_high_score_list, SCORE_FILE_NAME)
+            if self.cursor_target == "Go to main menu":
+                self.game.current_menu = self.game.main_menu
+            elif self.cursor_target == "Start new game":
+                self.game.start_new_game()
+                self.game.playing = True
+
+    def display_menu(self):
+
+        while self.game.current_menu == self.game.game_over_menu and \
+            not self.game.playing:
+            self.game.window.fill(BLACK)
+            self.game.check_events()
+            self.check_events()
+            self.game.draw_text(
+                self.game.window, "GAME OVER", CASUAL_TEXT_SIZE+10,
+                [HALF_DISP_WIDTH, 100], WHITE,
+                True
+            )
+            self.game.draw_text(
+                self.game.window, "Go to main menu", CASUAL_TEXT_SIZE,
+                FINISH_GO_MAIN_POS, RED,
+                False
+            )
+            self.game.draw_text(
+                self.game.window, "Start new game", CASUAL_TEXT_SIZE,
+                FINISH_PLAY_AGAIN_POS, RED,
+                False
+            )
+            self.draw_cursor()
+            pygame.display.update()
+            self.game.reset_keys()

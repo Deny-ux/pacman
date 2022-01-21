@@ -1,3 +1,6 @@
+from cmath import sqrt
+
+import copy
 from constants import *
 import pygame
 from pygame.math import Vector2 as vec
@@ -5,14 +8,17 @@ from pygame.math import Vector2 as vec
 j = 1
 
 class Player:
-    def __init__(self, game, start_grid_pos) -> None:
+    def __init__(self, game, start_grid_pos, saved_score=0, saved_lives=3) -> None:
         self.game = game
         self.grid_pos = start_grid_pos  # list of two elements
         self.pix_pos = self.get_pix_pos(self.grid_pos)  # left top corner coordinates
+        self.start_grid_pos = copy.deepcopy(start_grid_pos)
+        self.start_pix_pos = self.get_pix_pos(self.start_grid_pos)
+
         self.direction = vec(0, 0)
         self.stored_direction = vec(0, 0)
-        self.score = 0
-        self.lives = COUNT_PLAYER_START_LIVES
+        self.score = saved_score
+        self.lives = saved_lives
         heart_image = pygame.image.load(HEART_IMAGE_PATH)
         self.heart_image = pygame.transform.scale(heart_image ,(HEART_IMAGE_WIDTH, HEART_IMAGE_HEIGHT))
 
@@ -32,6 +38,11 @@ class Player:
                     return False
         return True
 
+    def is_collision_with_enemy(self, enemy_pix_pos):
+        distance = (((self.pix_pos[0] - enemy_pix_pos[0])**2) + ((self.pix_pos[1] - enemy_pix_pos[1])**2))**(0.5)
+        if distance < SQUARE_WIDTH:
+            return True
+        return False
 
     def can_change_direction(self):
         if self.stored_direction != vec(0, 0) and self.direction != self.stored_direction:
@@ -52,6 +63,9 @@ class Player:
         self.pix_pos[1] += int(self.direction.y*PLAYER_SPEED)
         self.grid_pos = self.get_grid_pos(self.pix_pos)
 
+    def remove_live(self):
+        self.lives -= 1
+
     def update(self):
         # if self.stored_direction is not None:
         #     if self.can_move():
@@ -62,8 +76,32 @@ class Player:
             self.change_direction()
         if self.can_move():
             self.move()
+        for enemy in self.game.enemies:
+            if(self.is_collision_with_enemy(enemy.pix_pos)):
+                self.reset_position_and_direction()
+                self.game.reset_enemies()
+                self.remove_live()
+                if self.lives == 0:
+                    #  game over
+                    self.game.playing = False
+                    self.game.current_menu = self.game.game_over_menu
+                break
+
+
         if self.on_coin():
             self.eat_coin()
+    def reset_position_and_direction(self):
+        """
+        This function created to
+        reset enemy position to initial
+        after player hit enemy
+        """
+        self.grid_pos = copy.deepcopy(self.start_grid_pos)
+        self.pix_pos = copy.deepcopy(self.start_pix_pos)
+        self.direction = vec(0, 0)
+        self.stored_direction = vec(0, 0)
+
+
 
     def get_pix_pos(self, grid_pos):
         """
@@ -117,13 +155,6 @@ class Player:
         self.direction = vec(0, 0)
         self.stored_direction = vec(0, 0)
         self.lives = COUNT_PLAYER_START_LIVES
+        self.grid_pos = self.start_grid_pos
+        self.pix_pos = self.start_grid_pos
 
-
-# print( int(pl.pix_pos[0] - LEFT_RIGHT_PADDING ) % SQUARE_WIDTH)
-# if int(pl.pix_pos[0] - LEFT_RIGHT_PADDING - SQUARE_WIDTH//2) % SQUARE_WIDTH == 0:
-#     print(1)
-
-# print(pl.grid_pos)
-# print(pl.pix_pos)
-# print(pl.get_grid_pos([60, 60]))
-# print(pl.get_grid_pos([70, 50]))

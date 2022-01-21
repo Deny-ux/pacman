@@ -6,28 +6,28 @@
     "enemies":
     [
         {
-            "pos": [14, 11],
+            "pos": [14, 13],
             "color": [255, 0, 0],
             "movement_mode": "random",
-            "speed": 0.5
+            "speed": 1.7
         },
         {
-            "pos": [20, 11],
+            "pos": [20, 13],
             "color": [0, 239, 255],
             "movement_mode": "random",
             "speed": 1
         },
         {
-            "pos": [14, 13],
+            "pos": [14, 11],
             "color": [0, 0, 255],
             "movement_mode": "optimal",
-            "speed": 1
+            "speed": 1.5
         },
         {
-            "pos": [20, 13],
+            "pos": [20, 11],
             "color": [255, 111, 0],
             "movement_mode": "optimal",
-            "speed": 1
+            "speed": 1.2
         }
     ],
     "player_grid_pos":

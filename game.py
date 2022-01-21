@@ -14,8 +14,8 @@ from enemy import Enemy
 class Game():
     def __init__(self) -> None:
         pygame.init()
-        # self.run_menu, self.playing = True, False
-        self.playing, self.run_menu = True, False # CHANGE
+        self.run_menu, self.playing = True, False
+        # self.playing, self.run_menu = True, False # CHANGE
         self.clock = pygame.time.Clock()
         self.window = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
         self.main_menu = MainMenu(self)
@@ -25,18 +25,19 @@ class Game():
         self.choose_game_menu = ChooseGameMenu(self)
         self.finished_game_menu = FinishedGameMenu(self)
         self.pause_menu = PauseMenu(self)
+        self.game_over_menu = GameOverMenu(self)
         self.UP_KEY, self.DOWN_KEY = False, False
         self.ENTER_KEY, self.ESC_KEY = False, False
         self.LEFT_KEY, self.RIGHT_KEY = False, False
         self.player_name = "Player"
-        self.player = Player(self, PLAYER_START_GRID_POS)
+        self.player = None
         self.wall_map = []
         self.walls = []
         self.coins = []
         self.enemies = []
         self.energizers = []
+        # self.current_menu = self.set_name_menu
         self.current_menu = self.set_name_menu
-        # self.current_menu = self.finished_game_menu
         self.font = pygame.font.Font(FONT_NAME, 20)
 
     # def load_new_map(self):
@@ -84,7 +85,7 @@ class Game():
             if self.playing == self.run_menu == False:  # Quit the game
                 self.close_game()
 
-    def save_current_game(self):
+    def save_current_game_to_file(self, file_name):
         pass
 
     # def load_game_from_file(self, file_name):
@@ -98,7 +99,6 @@ class Game():
     #     ]
 
     def play(self):
-        # print(self.walls)
         self.draw_walls()
         while self.playing:
             self.window.fill(BLACK)
@@ -110,13 +110,11 @@ class Game():
             # self.draw_grid()
             for enemy in self.enemies:
                 enemy.update()
-            #     print(enemy)
             self.player.update()
             self.player.draw()
             if self.game_is_finished():
                 self.playing, self.run_menu = False, True
                 self.current_menu = self.finished_game_menu
-            # print(1)
             if self.ESC_KEY:  # MAKE MENU
                 self.run_menu, self.playing = True, False
 
@@ -124,34 +122,39 @@ class Game():
             pygame.display.update()
 
 
-    def write_data_from_file(self, file_name):
+    def write_data_from_file(self, file_name, saved_score=0, saved_lives=COUNT_PLAYER_START_LIVES):
+        self.enemies.clear()
         dict_elements = helper_functions.load_level_data_from_json(file_name)
+
         self.walls = dict_elements.get("walls")
         self.coins = dict_elements.get("coins")
-
+        start_player_grid_pos = dict_elements.get("player_grid_pos")
+        self.player = Player(self, start_player_grid_pos, saved_score, saved_lives)
         enemies = dict_elements.get("enemies")
-        # for enemy, enemy_pos in zip(self.enemies, enemies_pos):
         for enemy in enemies:
             self.enemies.append(Enemy(
                 self, enemy["movement_mode"],
                 enemy["pos"], enemy["color"],
                 enemy["speed"]))
 
-        # for enemy in self.enemies:
-            # print(enemy)
-        # for enemy in self.enemies:
-        #     enemy.grid_pos = enemy
+
         self.energizers = dict_elements.get("energizers")
-        self.player.grid_pos = dict_elements.get("player_grid_pos")
-        self.player.pix_pos = self.player.get_pix_pos(self.player.grid_pos)
         self.wall_map = helper_functions.get_walls_list_pos(self.walls)
+
+    def set_data_from_file(self, file_name):
+        """
+        This function reads a json file with a
+        game settings and write these data to variables
+        inside classes
+        """
+
 
     def load_saved_game(self):
         self.write_data_from_file(SAVED_GAME_FILE_NAME)
 
 
-    def start_new_game(self):
-        self.write_data_from_file(NEW_MAP_FILE_NAME)
+    def start_new_game(self, saved_score=0, saved_lives=COUNT_PLAYER_START_LIVES):
+        self.write_data_from_file(NEW_MAP_FILE_NAME, saved_score, saved_lives)
         # self.load_new_map()
         # self.player.score == 0
 
@@ -167,6 +170,10 @@ class Game():
                 if event.key == pygame.K_RETURN:
                     self.ENTER_KEY = True
                 elif event.key == pygame.K_ESCAPE:
+                    if self.playing == True:
+                        self.playing = False
+                        self.current_menu = self.pause_menu
+
                     self.ESC_KEY = True
                 elif event.key == pygame.K_DOWN:
                     if self.playing:
@@ -184,6 +191,11 @@ class Game():
                     if self.playing:
                         self.player.stored_direction = vec(-1, 0)
                     self.LEFT_KEY == True
+
+    def reset_enemies(self):
+        print(999999999)
+        for enemy in self.enemies:
+            enemy.reset_position_and_direction()
 
     def draw_grid(self):
         for x in range(
@@ -241,21 +253,3 @@ class Game():
             self.window, f"Current score {self.player.score}",
             CASUAL_TEXT_SIZE-5, CURRENT_SCORE_POS, WHITE, False
         )
-
-    # def finish_game(self):
-    #     if len(self.coins) == 0:
-
-    # def get_left_upper_pos_text(self, text, size, pos):
-    #     """
-    #     Return pixel position of text depending og
-    #     its size, position and its alignment
-    #     """
-    #     font = pygame.font.Font(FONT_NAME, size)
-    #     text_surface = font.render(text, False, (0, 0, 0))
-
-    #     text_rect = text_surface.get_rect()
-    #     text_rect.center = (pos[0], pos[1])
-    #     # text_rect.x -= text_rect.width//2
-    #     # text_rect.y -= text_rect.height//2
-    #     # print(str(text_rect.x)+ " " + str(text_rect.y) + "")
-    #     return text_rect

@@ -203,7 +203,7 @@ def get_walls_list_pos(list_walls_pos):
         for wall_pos in list_walls_pos:
             x, y = wall_pos[0], wall_pos[1]
             map[y][x] = "W"
-        return
+        return map
 
 # ############################################
 
@@ -326,3 +326,82 @@ def get_walls_list_pos(list_walls_pos):
 # # def can_move()
 # def BFS(start_pos, walls, end_pos):
 #     pass
+
+map_list = [['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'], ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', '0', '0', '0', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'], ['W', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'W', 'W', '0', '0', '0', '0', '0', 'W', 'W', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'W'], ['W', 'W', 'W', '0', 'W', 'W', '0', 'W', 'W', 'W', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'W', 'W', 'W', '0', 'W', 'W', '0', 'W', 'W', 'W'], ['W', '0', '0', '0', '0', '0', '0', '0', '0', 'W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W', '0', '0', '0', '0', '0', '0', '0', '0', 'W'], ['W', '0', '0', '0', '0', '0', '0', '0', '0', 'W', '0', 'W', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'W', '0', 'W', '0', '0', '0', '0', '0', '0', '0', '0', 'W'], ['W', 'W', '0', 'W', 'W', '0', 'W', 'W', '0', 'W', '0', 'W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W', '0', 'W', '0', 'W', 'W', '0', 'W', 'W', '0', 'W', 'W'], ['W', 'W', '0', 'W', '0', '0', '0', 'W', '0', 'W', '0', 'W', '0', 'W', '0', '0', '0', '0', '0', '0', '0', 'W', '0', 'W', '0', 'W', '0', 'W', '0', '0', '0', 'W', '0', 'W', 'W'], ['W', 'W', '0', 'W', 'W', '0', 'W', 'W', '0', 'W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W', '0', 'W', 'W', '0', 'W', 'W', '0', 'W', 'W'], ['W', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'W'], ['W', 'W', 'W', '0', 'W', 'W', 'W', 'W', '0', 'W', 'W', 'W', '0', 'W', 'W', 'W', '0', '0', '0', 'W', 'W', 'W', '0', 'W', 'W', 'W', '0', 'W', 'W', 'W', 'W', '0', 'W', 'W', 'W'], ['W', 'W', 'W', '0', 'W', '0', '0', 'W', '0', 'W', '0', 'W', '0', 'W', '0', '0', '0', '0', '0', '0', '0', 'W', '0', 'W', '0', 'W', '0', 'W', '0', '0', 'W', '0', 'W', 'W', 'W'], ['W', 'W', 'W', '0', 'W', '0', '0', 'W', '0', 'W', '0', 'W', '0', 'W', '0', '0', '0', '0', '0', '0', '0', 'W', '0', 'W', '0', 'W', '0', 'W', '0', '0', 'W', '0', 'W', 'W', 'W'], ['W', 'W', 'W', '0', 'W', '0', '0', 'W', '0', 'W', '0', 'W', '0', 'W', '0', '0', '0', '0', '0', '0', '0', 'W', '0', 'W', '0', 'W', '0', 'W', '0', '0', 'W', '0', 'W', 'W', 'W'], ['W', 'W', 'W', '0', 'W', '0', '0', 'W', '0', 'W', '0', 'W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W', '0', 'W', '0', 'W', '0', '0', 'W', '0', 'W', 'W', 'W'], ['W', 'W', 'W', '0', 'W', '0', '0', 'W', '0', 'W', '0', 'W', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'W', '0', 'W', '0', 'W', '0', '0', 'W', '0', 'W', 'W', 'W'], ['W', 'W', 'W', '0', 'W', '0', '0', 'W', '0', 'W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W', '0', 'W', '0', '0', 'W', '0', 'W', 'W', 'W'], ['W', 'W', 'W', '0', 'W', 'W', 'W', 'W', '0', 'W', 'W', 'W', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'W', 'W', 'W', '0', 'W', 'W', 'W', 'W', '0', 'W', 'W', 'W'], ['W', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'W'], ['W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W'], ['W', '0', 'W', '0', '0', '0', '0', '0', 'W', '0', 'W', 'W', 'W', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'W', 'W', 'W', '0', 'W', '0', '0', '0', '0', '0', 'W', '0', 'W'], ['W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W', 'W', 'W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W', 'W', 'W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W'], ['W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W', 'W', 'W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W', 'W', 'W', '0', 'W', 'W', 'W', 'W', 'W', 'W', 'W', '0', 'W'], ['W', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', 'W'], ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W']]
+from pygame.math import Vector2 as vec
+import queue
+
+grid_pos = [20, 11]
+# [14, 11]
+# [14, 12] +-
+#[14, 15]
+target_pos = [17, 23]
+# if self.movement_mode == OPTIMAL_MOTION_MODE:
+#     self.target_pos = self.game.player.grid_pos
+#     next_pos = self.next_cell_position(self.grid_pos, self.target_pos, self.game.walls)
+#     self.direction = self.get_next_direction(next_pos)
+
+def next_cell_position(current_grid_pos, target_grid_pos, map):
+    """
+    function returns the value of the next cell
+    where the enemy must go to get to the target
+    as quickly as possible
+    """
+    shortest_path = breadth_first_search(current_grid_pos, target_grid_pos, map)
+    return shortest_path[1]
+
+def get_next_direction(next_pos):
+    next_direction = vec(
+        next_pos[0] - grid_pos[0],
+        next_pos[1] - grid_pos[1]
+    )
+    return next_direction
+
+
+
+def breadth_first_search(start_grid_pos, target_grid_pos, map):
+    """
+    This function returns list
+    of the shortest path between start_grid_pos
+    and target_grid_pos considering walls positions in map
+    """
+
+    queue_path = queue.Queue()
+    queue_path.put(start_grid_pos)
+    path = []
+    visited = []
+    while queue_path:
+        current = queue_path.get()
+        visited.append(current)
+        if current == target_grid_pos:
+            break
+        else:
+            neighbours = [[0, -1], [1, 0], [0, 1], [-1, 0]]
+            for neighbour in neighbours:
+                # if neighbour[0]+current[0] >= 0 and \
+                #     neighbour[0] + current[0] < len(map[0]) and\
+                #     neighbour[1]+current[1] >= 0 and \
+                #         neighbour[1] + current[1] < len(map):
+                if neighbour[0]+current[0] >= 0 and neighbour[0] + current[0] < len(map[0]) and \
+                    neighbour[1]+current[1] >= 0 and neighbour[1] + current[1] < len(map):
+                        next_cell = [neighbour[0] + current[0], neighbour[1] + current[1]]
+                        if next_cell not in visited and map[next_cell[1]][next_cell[0]] != "W":
+                            queue_path.put(next_cell)
+                            path.append({"Current": current, "Next": next_cell})
+    shortest_path = [target_grid_pos]
+    while target_grid_pos != start_grid_pos:
+        for step in path:
+            if step["Next"] == target_grid_pos:
+                target_grid_pos = step["Current"]
+                shortest_path.insert(0, step["Current"])
+    return shortest_path
+
+next_pos = next_cell_position(grid_pos, target_pos, map_list)
+
+direction = get_next_direction(next_pos)
+
+# print(grid_pos)  # [14, 11]
+# print(target_pos) # [17, 23]
+# print(map_list)
+print(9)
+print(direction)
