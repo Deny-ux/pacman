@@ -1,14 +1,11 @@
-from numpy import blackman
 import pygame
-# from game import Game # COMMENT AT ALL COST
 from constants import *
 import helper_functions
-from pygame.math import Vector2 as vec
+
 
 class Menu:
     def __init__(self, game) -> None:
         self.game = game
-        # self.run_display = False
         self.cursor_target = "Start game"
         self.cursor_rect = pygame.Rect(MAIN_START_X_POS + CURSOR_OFFSET_X, MAIN_START_Y_POS, CURSOR_WIDTH, CURSOR_HEIGHT)
         cursor_image = pygame.image.load(CURSOR_IMAGE_PATH)
@@ -25,7 +22,6 @@ class MainMenu(Menu):
     def __init__(self, game) -> None:
         super().__init__(game)
         self.show_main_menu = True
-        # self.state = "MainMenu"
 
     def check_events(self):
         if self.game.DOWN_KEY:
@@ -40,7 +36,7 @@ class MainMenu(Menu):
                 self.cursor_rect.x, self.cursor_rect.y = MAIN_EXIT_X_POS + CURSOR_OFFSET_X, MAIN_EXIT_Y_POS
             elif self.cursor_target == "Exit":
                 self.cursor_target = "Start game"
-                self.cursor_rect.x, self.cursor_rect.y = MAIN_START_X_POS+ CURSOR_OFFSET_X, MAIN_START_Y_POS
+                self.cursor_rect.x, self.cursor_rect.y = MAIN_START_X_POS + CURSOR_OFFSET_X, MAIN_START_Y_POS
         elif self.game.UP_KEY:
             if self.cursor_target == "Start game":
                 self.cursor_target = "Exit"
@@ -64,7 +60,6 @@ class MainMenu(Menu):
                 self.game.current_menu = self.game.credits_menu
             elif self.cursor_target == "Exit":
                 self.game.close_game()
-
 
     def display_menu(self):
         while self.game.current_menu == self.game.main_menu :
@@ -156,7 +151,6 @@ class HighScoreMenu(Menu):
         self.game.reset_keys()
 
     def display_score_list(self):
-        global j
         score_list = \
             helper_functions.load_high_score_data_from_file(SCORE_FILE_NAME)
         for i, score_item in enumerate(score_list):
@@ -173,8 +167,6 @@ class HighScoreMenu(Menu):
                 [SCORE_LIST_OFFSET+ 300, (i+1)*SCORE_ITEM_HEIGHT + SCORE_FIRST_ITEM_Y_POS], ORANGE,
                 False
             )
-
-
 
     def check_events(self):
         if self.game.ESC_KEY:
@@ -229,7 +221,7 @@ class SetNameMenu(Menu):
 
 
             pygame.display.update()
-        self.game.reset_keys()  # added just in case of some bugs occur
+        self.game.reset_keys()
 
 
 class ChooseGameMenu(Menu):
@@ -344,7 +336,6 @@ class FinishedGameMenu(Menu):
                     FINISH_PLAY_AGAIN_POS[0] + CURSOR_OFFSET_X, FINISH_PLAY_AGAIN_POS[1]
         elif self.game.ENTER_KEY:
             if self.cursor_target == "Go to main menu":
-                ###### UPDATE ####
                 new_score_item = (self.game.player_name, self.game.player.score)
                 new_high_score_list = \
                     helper_functions.get_updated_high_score_list(new_score_item, SCORE_FILE_NAME)
@@ -383,8 +374,8 @@ class FinishedGameMenu(Menu):
             self.draw_cursor()
             pygame.display.update()
             self.game.reset_keys()
-import player
-###########################
+
+
 class PauseMenu(Menu):
     def __init__(self, game) -> None:
         super().__init__(game)
@@ -490,7 +481,6 @@ class GameOverMenu(Menu):
                 self.game.playing = True
 
     def display_menu(self):
-
         while self.game.current_menu == self.game.game_over_menu and \
             not self.game.playing:
             self.game.window.fill(BLACK)

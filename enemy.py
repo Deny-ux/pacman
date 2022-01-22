@@ -1,94 +1,44 @@
 from constants import *
 import queue
-import pygame
 from pygame.math import Vector2 as vec
-# from game import Game
-import helper_functions
 import copy
 import random
-i = 1
-class Enemy:
+from moveable_object import MoveAbleObject
+
+
+class E:
+    def __init__(self) -> None:
+        pass
+
+    def t(self, a):
+        return 1
+
+class Enemy(MoveAbleObject):
     def __init__(self, game, movement_mode, current_grid_pos, start_grid_pos, color, speed) -> None:
-        self.game = game
-        self.grid_pos = current_grid_pos
-        self.pix_pos = self.get_pix_pos(self.grid_pos)
+        super().__init__(game, start_grid_pos, current_grid_pos, speed)
         self.initial_color = color
         self.color = copy.deepcopy(color)
-        self.speed = speed
-        self.start_grid_pos = copy.deepcopy(start_grid_pos)
-        self.start_pix_pos = self.get_pix_pos(self.start_grid_pos)
-        self.target_pos = None
         self.direction = vec(0, 0)
+        self.target_pos = None
         self.edible = False  # if True, than player can eat enemy
         self.initial_movement_mode = movement_mode
         self.movement_mode = copy.deepcopy(self.initial_movement_mode)
         self.count_moves_in_direction = 0  # variable for random movement logic
 
 
-    def draw(self):
-        pygame.draw.circle(self.game.window, self.color,
-            (self.pix_pos[0]+ SQUARE_WIDTH//2,
-            self.pix_pos[1]+ SQUARE_HEIGHT//2), SQUARE_WIDTH//2-2)
-
-
-    def get_grid_pos(self, pix_pos):
-        """
-        Returns grid position in
-        reference to pixel position
-        """
-        return [
-            (pix_pos[0] - LEFT_RIGHT_PADDING)//SQUARE_WIDTH,
-            (pix_pos[1] - TOP_BOTTOM_PADDING)//SQUARE_HEIGHT
-        ]
-
-    def get_pix_pos(self, grid_pos):
-        """
-        Returns the left top corner
-        in reference to
-        grid position
-        """
-        return [
-            (grid_pos[0]* SQUARE_WIDTH) + LEFT_RIGHT_PADDING,
-            (grid_pos[1]* SQUARE_HEIGHT) + TOP_BOTTOM_PADDING
-        ]
-
     def reset_position_and_direction(self):
-        """
-        This function created to
-        reset enemy position to initial
-        after player hit enemy
-        """
-        self.grid_pos = copy.deepcopy(self.start_grid_pos)
-        self.pix_pos = copy.deepcopy(self.start_pix_pos)
-        self.direction = vec(0, 0)
+        super().reset_position_and_direction()
         self.count_moves_in_direction = 0
-        pass
-
 
     def update_direction(self):
-        global i
-
+        """
+        if player used energizer, than enemy
+        moves randomly. Else enemy moves
+        according to its initial movement mode
+        """
         if self.edible:
-            """
-            According to player position set enemy position
-            to run away from him
-            """
             self.movement_mode = RANDOM_MOTION_MODE
             self.color = WHITE
-            # if self.game.player.grid_pos[0] >= int(COLUMNS//2) and self.game.player.grid_pos[1] >= int(ROWS//2):
-            #     self.target_pos = LEFT_UP_CORNER_POS
-            # elif self.game.player.grid_pos[0] >= int(COLUMNS//2) and self.game.player.grid_pos[1] < int(ROWS//2):
-            #     self.target_pos = LEFT_BOTTOM_CORNER_POS
-            # elif self.game.player.grid_pos[0] < int(COLUMNS//2) and self.game.player.grid_pos[1] >= int(ROWS//2):
-            #     self.target_pos = RIGTH_UP_CORNER_POS
-            # else:
-            #     self.target_pos = RIGHT_BOTTOM_CORNER_POS
-            # self.count_moves_in_direction -= 1
-            # if self.count_moves_in_direction <= 0:
-            #     self.direction = self.get_available_random_direction()
-            # next_pos = self.next_cell_position(self.grid_pos, self.target_pos, self.game.wall_map)
-            # self.direction = self.get_next_direction(next_pos)
-        # else:
         else:
             self.movement_mode = self.initial_movement_mode
             self.color = self.initial_color
@@ -102,9 +52,12 @@ class Enemy:
             next_pos = self.next_cell_position(self.grid_pos, self.target_pos, self.game.wall_map)
             self.direction = self.get_next_direction(next_pos)
 
-
-
     def get_next_direction(self, next_pos):
+        """
+        Returns direction of enemy movement
+        according to its current position
+        and next position
+        """
         next_direction = vec(
             next_pos[0] - self.grid_pos[0],
             next_pos[1] - self.grid_pos[1]
@@ -113,27 +66,19 @@ class Enemy:
 
     def is_on_center_of_cell(self):
         """
-        If the enemy is on center of cell return True
+        If the enemy is on center of cell in grid return True
         else False
         """
         if int(self.pix_pos[0] - LEFT_RIGHT_PADDING) % SQUARE_WIDTH == 0 and \
-            int(self.pix_pos[1]- TOP_BOTTOM_PADDING) % SQUARE_HEIGHT == 0:
+           int(self.pix_pos[1] - TOP_BOTTOM_PADDING) % SQUARE_HEIGHT == 0:
             return True
         return False
 
-    # def next_cell_position(self, current_grid_pos, target_grid_pos, map):
-    #     """
-    #     function returns the value of the next cell
-    #     where the enemy must go to get to the target
-    #     as quickly as possible
-    #     """
-    #     shortest_path = self.breadth_first_search(current_grid_pos, target_grid_pos, map)
-    #     return shortest_path[1]
-
     def get_available_random_direction(self):
         """
-        Returns a direction where enemy can go
-        considering walls around this enemy
+        Returns a random direction where enemy can go
+        considering walls around it and how many steps
+        in this direction enemy can go
         """
         next_position_list = [
             [int(self.grid_pos[0]+1), int(self.grid_pos[1])],
@@ -146,8 +91,6 @@ class Enemy:
         for pos in next_position_list:
             if pos not in self.game.walls:
                 available_pos_list.append(pos)
-
-
 
         next_cell = random.choice(available_pos_list)
 
@@ -163,7 +106,6 @@ class Enemy:
         self.count_moves_in_direction = random.randint(1, max_count_moves_in_direction)
         return direction
 
-
     def update(self):
         self.draw()
         if self.is_on_center_of_cell():
@@ -175,23 +117,6 @@ class Enemy:
             self.edible = False
             self.color = self.initial_color
         self.move()
-        #     if self.edible or self.movement_mode == OPTIMAL_MOTION_MODE:
-        #         self.update_target_pos()
-        #     # elif self.movement_mode == RANDOM_MOTION_MODE:
-        #         # self.set_random_direction()
-
-        # if self.movement_mode != RANDOM_MOTION_MODE:
-        #     pass
-        # else:
-            # self.update_target_pos()
-
-            # self.move()
-
-    def move(self):
-        self.pix_pos[0] += int(self.direction.x*self.speed)
-        self.pix_pos[1] += int(self.direction.y*self.speed)
-        self.grid_pos = self.get_grid_pos(self.pix_pos)
-
 
     def next_cell_position(self, current_grid_pos, target_grid_pos, map):
         """
@@ -204,22 +129,13 @@ class Enemy:
             return shortest_path[1]
         return target_grid_pos
 
-    # def get_next_direction(next_pos):
-    #     next_direction = vec(
-    #         next_pos[0] - grid_pos[0],
-    #         next_pos[1] - grid_pos[1]
-    #     )
-    #     return next_direction
-
-
-
     def breadth_first_search(self, start_grid_pos, target_grid_pos, map):
         """
         This function returns list
         of the shortest path between start_grid_pos
         and target_grid_pos considering walls positions in map
+        using breadth first search algorithm
         """
-
         queue_path = queue.Queue()
         queue_path.put(start_grid_pos)
         path = []
@@ -232,16 +148,13 @@ class Enemy:
             else:
                 neighbours = [[0, -1], [1, 0], [0, 1], [-1, 0]]
                 for neighbour in neighbours:
-                    # if neighbour[0]+current[0] >= 0 and \
-                    #     neighbour[0] + current[0] < len(map[0]) and\
-                    #     neighbour[1]+current[1] >= 0 and \
-                    #         neighbour[1] + current[1] < len(map):
                     if neighbour[0]+current[0] >= 0 and neighbour[0] + current[0] < len(map[0]) and \
-                        neighbour[1]+current[1] >= 0 and neighbour[1] + current[1] < len(map):
-                            next_cell = [neighbour[0] + current[0], neighbour[1] + current[1]]
-                            if next_cell not in visited and map[next_cell[1]][next_cell[0]] != "W":
-                                queue_path.put(next_cell)
-                                path.append({"Current": current, "Next": next_cell})
+                         neighbour[1]+current[1] >= 0 and neighbour[1] + current[1] < len(map):
+
+                        next_cell = [neighbour[0] + current[0], neighbour[1] + current[1]]
+                        if next_cell not in visited and map[next_cell[1]][next_cell[0]] != "W":
+                            queue_path.put(next_cell)
+                            path.append({"Current": current, "Next": next_cell})
         shortest_path = [target_grid_pos]
         while target_grid_pos != start_grid_pos:
             for step in path:
@@ -249,4 +162,3 @@ class Enemy:
                     target_grid_pos = step["Current"]
                     shortest_path.insert(0, step["Current"])
         return shortest_path
-

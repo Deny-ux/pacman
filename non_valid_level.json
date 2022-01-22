@@ -35,13 +35,6 @@
             "speed": 1
         }
     ],
-    "player":
-    {
-        "current_grid_pos": [17, 23],
-        "start_grid_pos": [17, 23],
-        "lives": 3,
-        "score": 0
-    },
     "energizers":
     {
         "grid_pos":

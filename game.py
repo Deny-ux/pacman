@@ -1,4 +1,3 @@
-# from turtle import width
 import pygame
 import json
 from pygame.math import Vector2 as vec
@@ -6,17 +5,16 @@ from energizer import Energizer
 from menu import *
 from player import *
 from constants import *
-from menu import *
 import helper_functions
 import sys
 from enemy import Enemy
+
 
 class Game():
     def __init__(self) -> None:
         pygame.init()
         pygame.time.set_timer(pygame.USEREVENT, 1000)
         self.run_menu, self.playing = True, False
-        # self.playing, self.run_menu = True, False # CHANGE
         self.clock = pygame.time.Clock()
         self.window = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
         self.main_menu = MainMenu(self)
@@ -40,7 +38,6 @@ class Game():
         self.energizers = []
         self.time_to_eat_enemies = 0  # to display how much time player can eat enemies
         self.energizer_time_action_remaining = 0
-        # self.current_menu = self.set_name_menu
         self.current_menu = self.set_name_menu
         self.font = pygame.font.Font(FONT_NAME, 20)
 
@@ -70,6 +67,12 @@ class Game():
                 self.close_game()
 
     def save_current_game_to_file(self, file_name):
+        """
+        This function writes the level data
+        to json file so that program can
+        load that level with saved parametrs
+        (player position, enemies position, etc.)
+        """
         with open(file_name, "w") as handle:
             data = dict()
             data["walls_pos_list"] = self.walls
@@ -105,26 +108,13 @@ class Game():
                 data["energizers"] = energizers
             json.dump(data, handle, indent=2)
 
-
-    # def load_game_from_file(self, file_name):
-
-    # def set_enemies(self):
-    #     self.enemies = [
-    #         Enemy(self, RANDOM_MOTION_MODE, ENEMY_1_START_POS, RED, 1)
-    #         # ENEMY_2_START_POS,
-    #         # ENEMY_3_START_POS,
-    #         # ENEMY_4_START_POS
-    #     ]
-
     def play(self):
-        # self.draw_walls()
         while self.playing:
             self.window.fill(BLACK)
             self.draw_current_score()
             self.draw_walls()
             self.draw_coins()
             self.check_events()
-            # self.draw_grid()
             for enemy in self.enemies:
                 enemy.update()
 
@@ -142,8 +132,12 @@ class Game():
             self.clock.tick(MAX_FPS)  # to control FPS
             pygame.display.update()
 
-
     def set_data_from_file(self, file_name):
+        """
+        This function read json file with level
+        setings and based on file content
+        create level
+        """
         self.enemies.clear()
         self.energizers.clear()
 
@@ -156,7 +150,7 @@ class Game():
             player_score = player["score"]
             player_lives = player["lives"]
             self.player = Player(self, player_start_grid_pos, player_current_grid_pos,
-            player_score, player_lives)
+                                 player_score, player_lives)
 
             enemies = dict_elements.get("enemies")
 
@@ -168,7 +162,7 @@ class Game():
                 speed = enemy["speed"]
                 self.enemies.append(
                     Enemy(self, movement_mode, enemy_current_grid_pos,
-                    enemy_start_grid_pos, color, speed)
+                          enemy_start_grid_pos, color, speed)
                 )
 
             self.walls = dict_elements["walls_pos_list"]
@@ -183,30 +177,27 @@ class Game():
                     self.energizers.append(energizer)
 
             self.wall_map = helper_functions.get_walls_list_pos(self.walls)
-        else:
-            pass
-    # def set_data_from_file(self, file_name):
-    #     """
-    #     This function reads a json file with a
-    #     game settings and write these data to variables
-    #     inside classes
-    #     """
-
 
     def load_saved_game(self):
+        """
+        Read data from file for
+        saving level
+        """
         self.set_data_from_file(SAVED_GAME_FILE_NAME)
 
-
     def start_new_game(self, saved_score=0, saved_lives=COUNT_PLAYER_START_LIVES):
+        """
+        Read data from file where initial
+        content of level is located.
+        If starts the game after passing level
+        than score and count of lives is saved.
+        Otherwise this data are setted by default
+        """
         self.set_data_from_file(NEW_MAP_FILE_NAME)
         self.player.score = saved_score
         self.player.lives = saved_lives
 
-    def update_events(self):
-        pass
-
     def check_events(self):
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.close_game()
@@ -243,18 +234,24 @@ class Game():
             enemy.reset_position_and_direction()
 
     def draw_grid(self):
-        for x in range(
-            LEFT_RIGHT_PADDING,
-            DISPLAY_WIDTH - LEFT_RIGHT_PADDING - SQUARE_WIDTH+1,
-            SQUARE_WIDTH):
-            for y in range(
-            TOP_BOTTOM_PADDING,
-            DISPLAY_HEIGHT - TOP_BOTTOM_PADDING - SQUARE_HEIGHT +1,
-            SQUARE_HEIGHT):
+        """
+        Helper function to see grid
+        where all elements will be located
+        """
+        for x in range(LEFT_RIGHT_PADDING,
+                       DISPLAY_WIDTH - LEFT_RIGHT_PADDING - SQUARE_WIDTH + 1,
+                       SQUARE_WIDTH):
+            for y in range(TOP_BOTTOM_PADDING,
+                           DISPLAY_HEIGHT - TOP_BOTTOM_PADDING - SQUARE_HEIGHT + 1,
+                           SQUARE_HEIGHT):
                 pygame.draw.rect(self.window, WHITE,
                 (x, y, SQUARE_WIDTH, SQUARE_HEIGHT), 1)
 
     def game_is_finished(self):
+        """
+        According to the task
+        game is finished after player ate all coins
+        """
         if len(self.coins) == 0:
             return True
         return False
@@ -264,8 +261,8 @@ class Game():
         sys.exit()
 
     def reset_keys(self):
-        self.UP_KEY, self.DOWN_KEY, self.ENTER_KEY, self.ESC_KEY, self.RIGHT_KEY, self.LEFT_KEY = False, False,  False, False, False, False
-
+        self.UP_KEY, self.DOWN_KEY, self.ENTER_KEY, self.ESC_KEY = False, False,  False, False
+        self.RIGHT_KEY, self.LEFT_KEY = False, False
 
     def draw_text(self, screen, text, size, pos, color, is_centered=True):
         """
@@ -289,8 +286,8 @@ class Game():
         grid position
         """
         return [
-            (grid_pos[0]* SQUARE_WIDTH) + LEFT_RIGHT_PADDING,
-            (grid_pos[1]* SQUARE_HEIGHT) + TOP_BOTTOM_PADDING
+            (grid_pos[0] * SQUARE_WIDTH) + LEFT_RIGHT_PADDING,
+            (grid_pos[1] * SQUARE_HEIGHT) + TOP_BOTTOM_PADDING
         ]
 
     def draw_current_score(self):
