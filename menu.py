@@ -287,11 +287,43 @@ class ChooseGameMenu(Menu):
             self.game.current_menu = self.game.main_menu
         elif self.game.ENTER_KEY:
             if self.cursor_target == "Load saved game":
-                self.game.load_saved_game()
-                self.game.playing = True
+                if helper_functions.load_level_data_from_json(SAVED_GAME_FILE_NAME) is not None:
+                    self.game.load_saved_game()
+                    self.game.playing = True
+                else:
+                    self.game.current_menu = self.game.save_file_is_empty_menu
             elif self.cursor_target == "Start new game":
                 self.game.start_new_game()
                 self.game.playing = True
+
+
+class SaveFileIsEmptyMenu(Menu):
+    def __init__(self, game) -> None:
+        super().__init__(game)
+
+    def display_menu(self):
+        while self.game.current_menu == self.game.save_file_is_empty_menu:
+            self.game.window.fill(BLACK)
+            self.game.check_events()
+
+            self.check_events()
+            self.game.draw_text(
+                self.game.window, "No saved games detected", CASUAL_TEXT_SIZE,
+                [HALF_DISP_WIDTH, HALF_DISP_HEIGHT], RED,
+                True
+            )
+            self.game.draw_text(
+                self.game.window, "Press escape to go back", CASUAL_TEXT_SIZE-4,
+                [HALF_DISP_WIDTH, SAVED_NOT_FOUND_ESCAPE_Y_POS], GREEN,
+                True
+            )
+            pygame.display.update()
+            self.game.reset_keys()
+
+    def check_events(self):
+        if self.game.ESC_KEY:
+            self.game.current_menu = self.game.choose_game_menu
+
 
 class FinishedGameMenu(Menu):
     def __init__(self, game) -> None:

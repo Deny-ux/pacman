@@ -10,7 +10,7 @@ from constants import *
 # )
 import json
 import csv
-
+import os
 
 class MalformedScoreDataError(Exception):
     pass
@@ -58,6 +58,7 @@ def take_second(elem):
 
 def get_dict_elements_from_map(file_name):
     try:
+
         with open(file_name, 'r') as handle:
             walls_list = []
             coins_list = []
@@ -96,14 +97,16 @@ def get_dict_elements_from_map(file_name):
             "You don't have permission to open file with new map!")
 
 
-def load_level_data_from_json(filename):
+def load_level_data_from_json(file_name):
     """
     This function returns dictionary
     with elements in json file
     """
     try:
+        if os.path.getsize(file_name) == 0:
+            return None
 
-        with open(filename, 'r') as handle:
+        with open(file_name, 'r') as handle:
             data_dict = json.load(handle)
             """
             Check if all elements
@@ -132,12 +135,13 @@ def load_level_data_from_json(filename):
                             "lives",
                             "score",
                             "score"
-                        )) and \
-                            all(key in energizers for key in (
-                                "grid_pos",
-                                "color",
-                                "secunds_duration"
-                            )):
+                        )):
+                        #  and \
+                        #     all(key in energizers for key in (
+                        #         "grid_pos",
+                        #         "color",
+                        #         "secunds_duration"
+                        #     )):
                         return data_dict
             raise MalformedNewMapData("Missing some keys in file!")
 
@@ -156,6 +160,7 @@ a= 1
 
 def load_high_score_data_from_file(file_name):
     try:
+
         with open(file_name) as handle:
             people = []
             reader = csv.DictReader(handle)

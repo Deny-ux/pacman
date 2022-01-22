@@ -12,15 +12,16 @@ class Enemy:
         self.game = game
         self.grid_pos = current_grid_pos
         self.pix_pos = self.get_pix_pos(self.grid_pos)
-        self.saved_color = color
-        self.color = color
+        self.initial_color = color
+        self.color = copy.deepcopy(color)
         self.speed = speed
         self.start_grid_pos = copy.deepcopy(start_grid_pos)
         self.start_pix_pos = self.get_pix_pos(self.start_grid_pos)
         self.target_pos = None
         self.direction = vec(0, 0)
         self.edible = False  # if True, than player can eat enemy
-        self.movement_mode = movement_mode
+        self.initial_movement_mode = movement_mode
+        self.movement_mode = copy.deepcopy(self.initial_movement_mode)
         self.count_moves_in_direction = 0  # variable for random movement logic
 
 
@@ -72,25 +73,34 @@ class Enemy:
             According to player position set enemy position
             to run away from him
             """
-            if self.game.player.grid_pos[0] >= int(COLUMNS//2) and self.game.player.grid_pos[1] >= int(ROWS//2):
-                self.target_pos = LEFT_UP_CORNER_POS
-            elif self.game.player.grid_pos[0] >= int(COLUMNS//2) and self.game.player.grid_pos[1] < int(ROWS//2):
-                self.target_pos = LEFT_BOTTOM_CORNER_POS
-            elif self.game.player.grid_pos[0] < int(COLUMNS//2) and self.game.player.grid_pos[1] >= int(ROWS//2):
-                self.target_pos = RIGTH_UP_CORNER_POS
-            else:
-                self.target_pos = RIGHT_BOTTOM_CORNER_POS
+            self.movement_mode = RANDOM_MOTION_MODE
+            self.color = WHITE
+            # if self.game.player.grid_pos[0] >= int(COLUMNS//2) and self.game.player.grid_pos[1] >= int(ROWS//2):
+            #     self.target_pos = LEFT_UP_CORNER_POS
+            # elif self.game.player.grid_pos[0] >= int(COLUMNS//2) and self.game.player.grid_pos[1] < int(ROWS//2):
+            #     self.target_pos = LEFT_BOTTOM_CORNER_POS
+            # elif self.game.player.grid_pos[0] < int(COLUMNS//2) and self.game.player.grid_pos[1] >= int(ROWS//2):
+            #     self.target_pos = RIGTH_UP_CORNER_POS
+            # else:
+            #     self.target_pos = RIGHT_BOTTOM_CORNER_POS
+            # self.count_moves_in_direction -= 1
+            # if self.count_moves_in_direction <= 0:
+            #     self.direction = self.get_available_random_direction()
+            # next_pos = self.next_cell_position(self.grid_pos, self.target_pos, self.game.wall_map)
+            # self.direction = self.get_next_direction(next_pos)
+        # else:
+        else:
+            self.movement_mode = self.initial_movement_mode
+            self.color = self.initial_color
+        if self.movement_mode == RANDOM_MOTION_MODE:
+            self.count_moves_in_direction -= 1
+            if self.count_moves_in_direction <= 0:
+                self.direction = self.get_available_random_direction()
+        elif self.movement_mode == OPTIMAL_MOTION_MODE:
+            self.count_moves_in_direction = 0
+            self.target_pos = self.game.player.grid_pos
             next_pos = self.next_cell_position(self.grid_pos, self.target_pos, self.game.wall_map)
             self.direction = self.get_next_direction(next_pos)
-        else:
-            if self.movement_mode == RANDOM_MOTION_MODE:
-                self.count_moves_in_direction -= 1
-                if self.count_moves_in_direction <= 0:
-                    self.direction = self.get_available_random_direction()
-            elif self.movement_mode == OPTIMAL_MOTION_MODE:
-                self.target_pos = self.game.player.grid_pos
-                next_pos = self.next_cell_position(self.grid_pos, self.target_pos, self.game.wall_map)
-                self.direction = self.get_next_direction(next_pos)
 
 
 
@@ -163,7 +173,7 @@ class Enemy:
             self.color = WHITE
         elif self.game.time_to_eat_enemies <= 0:
             self.edible = False
-            self.color = self.saved_color
+            self.color = self.initial_color
         self.move()
         #     if self.edible or self.movement_mode == OPTIMAL_MOTION_MODE:
         #         self.update_target_pos()
