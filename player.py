@@ -8,9 +8,9 @@ from pygame.math import Vector2 as vec
 j = 1
 
 class Player:
-    def __init__(self, game, start_grid_pos, saved_score=0, saved_lives=3) -> None:
+    def __init__(self, game, start_grid_pos, current_grid_pos, saved_score, saved_lives) -> None:
         self.game = game
-        self.grid_pos = start_grid_pos  # list of two elements
+        self.grid_pos = current_grid_pos  # list of two elements
         self.pix_pos = self.get_pix_pos(self.grid_pos)  # left top corner coordinates
         self.start_grid_pos = copy.deepcopy(start_grid_pos)
         self.start_pix_pos = self.get_pix_pos(self.start_grid_pos)
@@ -76,18 +76,29 @@ class Player:
             self.change_direction()
         if self.can_move():
             self.move()
-        for enemy in self.game.enemies:
-            if(self.is_collision_with_enemy(enemy.pix_pos)):
+        if self.in_energizer():
+            self.drink_energizer()
+        enemies_collisioned = [enemy for enemy in self.game.enemies if self.is_collision_with_enemy(enemy.pix_pos)]
+        # print(len(enemies_collisioned))
+        print(self.game.time_to_eat_enemies)
+        if len(enemies_collisioned) != 0:
+            if enemies_collisioned[0].edible:
+                for enemy in enemies_collisioned:
+                    enemy.reset_position_and_direction()
+            else:
                 self.reset_position_and_direction()
                 self.game.reset_enemies()
                 self.remove_live()
                 if self.lives == 0:
-                    #  game over
                     self.game.playing = False
                     self.game.current_menu = self.game.game_over_menu
-                break
+        enemies_collisioned.clear()
+        # for enemy in self.game.enemies:
+        #     if(self.is_collision_with_enemy(enemy.pix_pos)):
+        #         if not enemy.edible:
 
 
+        #         else:
         if self.on_coin():
             self.eat_coin()
     def reset_position_and_direction(self):
@@ -101,6 +112,17 @@ class Player:
         self.direction = vec(0, 0)
         self.stored_direction = vec(0, 0)
 
+    def in_energizer(self):
+        for energizer in self.game.energizers:
+            if energizer.grid_pos == self.grid_pos:
+                return True
+        return False
+
+    def drink_energizer(self):
+        for energizer in self.game.energizers:
+            if energizer.grid_pos == self.grid_pos:
+                self.game.energizers.remove(energizer)
+                self.game.time_to_eat_enemies = 10
 
 
     def get_pix_pos(self, grid_pos):

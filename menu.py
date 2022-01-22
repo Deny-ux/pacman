@@ -111,18 +111,18 @@ class CreditsMenu(Menu):
             self.check_events()
             self.game.draw_text(
                 self.game.window, "Made with great patience", CREDITS_TEXT_SIZE,
-                [CREDITS_TEXT1_X_POS, CREDITS_TEXT1_Y_POS], GREEN,
-                False
+                [HALF_DISP_WIDTH, CREDITS_TEXT1_Y_POS], GREEN,
+                True
             )
             self.game.draw_text(
                 self.game.window, "By Denys Dev", CREDITS_TEXT_SIZE,
-                [CREDITS_TEXT2_X_POS, CREDITS_TEXT2_Y_POS], GREEN,
-                False
+                [HALF_DISP_WIDTH, CREDITS_TEXT2_Y_POS], GREEN,
+                True
             )
             self.game.draw_text(
                 self.game.window, "Press escape to go back", CREDITS_ESCAPE_SIZE,
-                [CREDITS_ESCAPE_X_POS, CREDITS_ESCAPE_Y_POS], RED,
-                False
+                [HALF_DISP_WIDTH, CREDITS_ESCAPE_Y_POS], RED,
+                True
             )
             pygame.display.update()
             self.game.reset_keys()
@@ -383,10 +383,8 @@ class PauseMenu(Menu):
                 self.cursor_rect.x, self.cursor_rect.y = PAUSE_SAVE_GAME_POS[0] + CURSOR_OFFSET_X, PAUSE_SAVE_GAME_POS[1]
         elif self.game.ENTER_KEY:
             if self.cursor_target == "Continue":
-                print("continue")
                 self.game.playing = True
             elif self.cursor_target == "Save game":
-                print("save gabe")
                 self.game.save_current_game_to_file(SAVED_GAME_FILE_NAME)
             elif self.cursor_target == "Go to main menu":
                 if self.game.player is not None:
@@ -395,7 +393,6 @@ class PauseMenu(Menu):
                         helper_functions.get_updated_high_score_list(new_score_item, SCORE_FILE_NAME)
                     helper_functions.write_high_score_data_to_file(new_high_score_list, SCORE_FILE_NAME)
                 self.game.current_menu = self.game.main_menu
-                print("exit")
 
     def display_menu(self):
 

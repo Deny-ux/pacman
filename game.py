@@ -1,8 +1,8 @@
 # from turtle import width
-from turtle import goto
-from numpy import empty
 import pygame
+import json
 from pygame.math import Vector2 as vec
+from energizer import Energizer
 from menu import *
 from player import *
 from constants import *
@@ -14,6 +14,7 @@ from enemy import Enemy
 class Game():
     def __init__(self) -> None:
         pygame.init()
+        pygame.time.set_timer(pygame.USEREVENT, 1000)
         self.run_menu, self.playing = True, False
         # self.playing, self.run_menu = True, False # CHANGE
         self.clock = pygame.time.Clock()
@@ -36,18 +37,10 @@ class Game():
         self.coins = []
         self.enemies = []
         self.energizers = []
+        self.time_to_eat_enemies = 0  # to display how much time player can eat enemies
         # self.current_menu = self.set_name_menu
         self.current_menu = self.set_name_menu
         self.font = pygame.font.Font(FONT_NAME, 20)
-
-    # def load_new_map(self):
-        # dict_elements = helper_functions.get_dict_elements_from_map(NEW_MAP_FILE_NAME)
-        # dict_elements = helper_functions.load_level1_from_json(NEW_MAP_FILE_NAME)
-        # self.walls = dict_elements.get("walls")
-        # self.coins = dict_elements.get("coins")
-        # self.enemies = dict_elements.get("enemies")
-        # self.player.grid_pos = dict_elements.get("player_grid_pos")
-        # self.player.pix_pos = self.player.get_pix_pos(self.player.grid_pos)
 
     def draw_walls(self):
         for wall_pos in self.walls:
@@ -64,20 +57,9 @@ class Game():
                 (x + SQUARE_WIDTH//2, y + SQUARE_HEIGHT//2),
                 SQUARE_WIDTH//2-7)
 
-    def draw_energizers(self):
-        for energizer in self.energizers:
-            pix_pos = self.get_pix_pos(energizer)
-            x, y = pix_pos[0], pix_pos[1]
-            pygame.draw.circle(
-                self.window, PURPLE,
-                (x + SQUARE_WIDTH//2, y + SQUARE_HEIGHT//2),
-                SQUARE_WIDTH//2-4)
-
-
     def run(self):
         while True:
             while self.playing:
-                print("You are playing yeaaay")
                 self.play()
                 pygame.display.update()
             if self.current_menu is not None:
@@ -86,7 +68,40 @@ class Game():
                 self.close_game()
 
     def save_current_game_to_file(self, file_name):
-        pass
+        with open(file_name, "w") as handle:
+            data = dict()
+            data["walls_pos_list"] = self.walls
+            data["remaining_time_energizer"] = self.time_to_eat_enemies
+            data["coins_pos_list"] = self.coins
+            data["enemies"] = []
+            for enemy in self.enemies:
+                enemy_el = dict()
+                enemy_el["current_grid_pos"] = enemy.grid_pos
+                enemy_el["start_grid_pos"] = enemy.start_grid_pos
+                enemy_el["color"] = enemy.color
+                enemy_el["movement_mode"] = enemy.movement_mode
+                enemy_el["speed"] = enemy.speed
+                data["enemies"].append(enemy_el)
+
+            player_dict = dict()
+            player_dict["current_grid_pos"] = self.player.grid_pos
+            player_dict["start_grid_pos"] = self.player.start_grid_pos
+            player_dict["lives"] = self.player.lives
+            player_dict["score"] = self.player.score
+
+            data["player"] = player_dict
+            energizers_pos = []
+            for energizer in self.energizers:
+                energizers_pos.append(energizer.grid_pos)
+                energizer_color = energizer.color
+                energizer_secunds_duration = energizer.secunds_duration
+            energizers = dict()
+            energizers["grid_pos"] = energizers_pos
+            energizers["color"] = energizer_color
+            energizers["secunds_duration"] = energizer_secunds_duration
+            data["energizers"] = energizers
+            json.dump(data, handle, indent=2)
+
 
     # def load_game_from_file(self, file_name):
 
@@ -99,17 +114,20 @@ class Game():
     #     ]
 
     def play(self):
-        self.draw_walls()
+        # self.draw_walls()
         while self.playing:
             self.window.fill(BLACK)
             self.draw_current_score()
             self.draw_walls()
             self.draw_coins()
-            self.draw_energizers()
             self.check_events()
             # self.draw_grid()
             for enemy in self.enemies:
                 enemy.update()
+
+            for energizer in self.energizers:
+                energizer.draw()
+
             self.player.update()
             self.player.draw()
             if self.game_is_finished():
@@ -122,23 +140,43 @@ class Game():
             pygame.display.update()
 
 
-    def write_data_from_file(self, file_name, saved_score=0, saved_lives=COUNT_PLAYER_START_LIVES):
+    def write_data_from_file(self, file_name):
         self.enemies.clear()
+        self.energizers.clear()
+
         dict_elements = helper_functions.load_level_data_from_json(file_name)
+        self.time_to_eat_enemies = dict_elements["remaining_time_energizer"]
+        player = dict_elements["player"]
+        player_current_grid_pos = player["current_grid_pos"]
+        player_start_grid_pos = player["start_grid_pos"]
+        player_score = player["score"]
+        player_lives = player["lives"]
+        self.player = Player(self, player_start_grid_pos, player_current_grid_pos,
+        player_score, player_lives)
 
-        self.walls = dict_elements.get("walls")
-        self.coins = dict_elements.get("coins")
-        start_player_grid_pos = dict_elements.get("player_grid_pos")
-        self.player = Player(self, start_player_grid_pos, saved_score, saved_lives)
         enemies = dict_elements.get("enemies")
+
         for enemy in enemies:
-            self.enemies.append(Enemy(
-                self, enemy["movement_mode"],
-                enemy["pos"], enemy["color"],
-                enemy["speed"]))
+            movement_mode = enemy["movement_mode"]
+            enemy_current_grid_pos = enemy["current_grid_pos"]
+            enemy_start_grid_pos = enemy["start_grid_pos"]
+            color = enemy["color"]
+            speed = enemy["speed"]
+            self.enemies.append(
+                Enemy(self, movement_mode, enemy_current_grid_pos,
+                enemy_start_grid_pos, color, speed)
+            )
 
+        self.walls = dict_elements["walls_pos_list"]
+        self.coins = dict_elements["coins_pos_list"]
 
-        self.energizers = dict_elements.get("energizers")
+        energizers = dict_elements["energizers"]
+        energizer_color = energizers["color"]
+        energizer_secunds_duration = energizers["secunds_duration"]
+        for energizer_pos in energizers["grid_pos"]:
+            energizer = Energizer(self, energizer_pos, energizer_color, energizer_secunds_duration)
+            self.energizers.append(energizer)
+
         self.wall_map = helper_functions.get_walls_list_pos(self.walls)
 
     def set_data_from_file(self, file_name):
@@ -154,18 +192,20 @@ class Game():
 
 
     def start_new_game(self, saved_score=0, saved_lives=COUNT_PLAYER_START_LIVES):
-        self.write_data_from_file(NEW_MAP_FILE_NAME, saved_score, saved_lives)
-        # self.load_new_map()
-        # self.player.score == 0
+        self.write_data_from_file(NEW_MAP_FILE_NAME)
+        self.player.score = saved_score
+        self.player.lives = saved_lives
 
     def update_events(self):
         pass
 
     def check_events(self):
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.close_game()
-
+            elif event.type == pygame.USEREVENT and self.playing:
+                self.time_to_eat_enemies -= 1
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     self.ENTER_KEY = True
@@ -193,7 +233,6 @@ class Game():
                     self.LEFT_KEY == True
 
     def reset_enemies(self):
-        print(999999999)
         for enemy in self.enemies:
             enemy.reset_position_and_direction()
 

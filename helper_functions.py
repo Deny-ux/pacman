@@ -110,15 +110,36 @@ def load_level_data_from_json(filename):
             are present in file
             """
             if all(key in data_dict for key in (
-                "walls",
-                "coins",
+                "walls_pos_list",
+                "coins_pos_list",
                 "enemies",
-                "player_grid_pos",
-                "energizers")):
-
-                return data_dict
-            else:
-                raise MalformedNewMapData("Missing key in file!")
+                "player",
+                "energizers",
+                "remaining_time_energizer")):
+                player = data_dict["player"]
+                energizers = data_dict["energizers"]
+                for enemy in data_dict["enemies"]:
+                    if all(key in enemy for key in(
+                        "current_grid_pos",
+                        "start_grid_pos",
+                        "color",
+                        "movement_mode",
+                        "speed"
+                    )) and \
+                        all(key in player for key in(
+                            "current_grid_pos",
+                            "start_grid_pos",
+                            "lives",
+                            "score",
+                            "score"
+                        )) and \
+                            all(key in energizers for key in (
+                                "grid_pos",
+                                "color",
+                                "secunds_duration"
+                            )):
+                        return data_dict
+            raise MalformedNewMapData("Missing some keys in file!")
 
     except FileNotFoundError:
         raise NewMapFileNotFoundError("Can not find file with new map!")
@@ -128,8 +149,10 @@ def load_level_data_from_json(filename):
         raise NewMapFilePermissionError(
             "You don't have permission to open file with new map!")
 
+d = load_level_data_from_json("lvl1.json")
+pass
 # def sort_high_scores_list(score_list):
-
+a= 1
 
 def load_high_score_data_from_file(file_name):
     try:
