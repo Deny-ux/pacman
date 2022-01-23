@@ -4,6 +4,10 @@ import helper_functions
 
 
 class Menu:
+    """
+    This class is parent class
+    for all menus in this program
+    """
     def __init__(self, game) -> None:
         self.game = game
         self.cursor_target = "Start game"

@@ -11,6 +11,9 @@ from enemy import Enemy
 
 
 class Game():
+    """
+    Class for game logic
+    """
     def __init__(self) -> None:
         pygame.init()
         pygame.time.set_timer(pygame.USEREVENT, 1000)
@@ -126,7 +129,7 @@ class Game():
             if self.game_is_finished():
                 self.playing, self.run_menu = False, True
                 self.current_menu = self.finished_game_menu
-            if self.ESC_KEY:  # MAKE MENU
+            if self.ESC_KEY:
                 self.run_menu, self.playing = True, False
 
             self.clock.tick(MAX_FPS)  # to control FPS
